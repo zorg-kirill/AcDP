@@ -13,9 +13,10 @@ AcDP::Application.routes.draw do
   end
 
   get 'calendar', to: 'calendar'
+  get 'calendar/day/:date', to: 'calendar#day', as: 'day'
   get 'documents', to: 'documents#index'
 
-  get 'documents/tree/:type', to: 'documents#jstree'
+  get 'documents/tree/:docdir/:type', to: 'documents#jstree'
 
   get 'documents/shared', to: 'documents#shared'
   get 'documents/shared/:user_id', to: 'documents#shared', as: 'document_shared_root'
@@ -24,8 +25,10 @@ AcDP::Application.routes.draw do
 
   post 'documents', to: 'documents#new'
   patch 'documents/update', to: 'documents#update'
+  post 'documents/change_file', to: 'documents#change_file'
   post 'documents/update_lists', to: 'documents#update_lists'
   post 'documents/:id', to: 'documents#new', as: 'document_new'
+  delete 'documents/file/:delete_id', to: 'documents#delete_file', as: 'document_delete_file'
   delete 'documents/delete/:delete_id', to: 'documents#delete', as: 'document_delete_root'
   delete 'documents/:id/delete/:delete_id', to: 'documents#delete', as: 'document_delete'
 
@@ -59,8 +62,9 @@ AcDP::Application.routes.draw do
   resources :contacts, only: [:index, :create, :destroy]
 
   resources :tasks
+  post 'tasks/:id' => 'tasks#update_checklist', as: :update_checklist
 
   resources :events
 
-  resources :notifications, only: [:index]
+  get 'activity' => 'application#panel_activity', as: :activity_popover
 end

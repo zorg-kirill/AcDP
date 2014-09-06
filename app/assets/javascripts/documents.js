@@ -21,26 +21,36 @@ $(document).ready(function(){
     });
 
     $("#documents_new_file").change(function (){
-        var fileName = $(this).val();
-        $("#documents_new_doc_title").val(fileName.split('\\').pop());
+        var fileName = $(this).val(),
+            docsAddTitle = $("#documents_new_doc_title");
+
+        if(docsAddTitle.val() == '') {
+          $("#documents_new_doc_title").val(fileName.split('\\').pop());
+        }
     });
 
     $('#documents-table').on('mouseover' ,'.docs-title', function(event) {
+      $this = $(this);
+      if($this.data('visible')) {
         $(this).find('.docs-navbar-tool').show();
+      }
     }).on('mouseout', '.docs-title', function(event) {
         $(this).find('.docs-navbar-tool').hide();
     }).on('click', '.docs-navbar-tool', function(event){
         event.stopPropagation();
-    }).on('click', '#btn_remove_document', function(event) {
+    }).on('click', '.btn_remove_document', function(event) {
         $("#document_remove_path").attr('href', $(this).data('path'));
     });
 
-    $('#collapseInfo').on('click', '#btn_remove_document', function(event) {
+    $('#collapseInfo').on('click', '.btn_remove_document', function(event) {
         $("#document_remove_path").attr('href', $(this).data('path'));
     });
 
     $('#documents-users-table').on('mouseover' ,'.docs-title', function(event) {
-        $(this).find('.docs-navbar-tool').show();
+      $this = $(this);
+      if($this.data('visible')) {
+        $this.find('.docs-navbar-tool').show();
+      }
     }).on('mouseout', '.docs-title', function(event) {
         $(this).find('.docs-navbar-tool').hide();
     });
@@ -91,24 +101,60 @@ $(document).ready(function(){
         }
     });
 
-    // document select tree
-    var docs_list = $('#modal-docs-list');
-    if(docs_list.length) {
-        docs_list.jstree({ core: {
-            data: {
-                url : function (node) {
-                    return '/documents/tree/owned.json';
-                },
-                data : function (node) {
-                    return { id: node.id };
-                }
-            }
-        },
-            plugins: ['wholerow', 'checkbox']
-        });
+    if ($('.docs-move-document-btn').length > 0) {
+      initDocsTree('dir', 'owned', false);
 
-        docs_list.on("loaded.jstree", function(event, data) {
-            $('#doc-select-jsPanel').jScrollPane({autoReinitialise: true});
-        });
+      $(document).on('click', '.docs-move-document-btn', function() {
+        $('#doc-select-pk').val($(this).data('docpk'));
+      });
+
+      $('#modal-docs-list').on("select_node.jstree", function (node, selected, e) {
+        $('#doc-select-target-pk').val(selected.selected[0]);
+      });
+
+      $('#modal-docs-list').on("deselect_node.jstree", function (node, selected, e) {
+        if(selected.selected.length === 0)
+          $('#doc-select-target-pk').val('root');
+      });
     }
+
+    $(document).on('ajax:success', '.attached-file', function(e, data, status, xhr) {
+      if(data.status == 'ok') {
+        var $fileSpan = $('#attached-file-' + data.doc);
+        $fileSpan.closest('tr').prev().data('visible', false);
+        $fileSpan.empty();
+      }
+    });
+
+    $(document).on('ajax:success', '.form-change-file', function(e, data, status, xhr) {
+      if(data.status == 'ok') {
+        var $row = $(this).closest('tr').prev();
+        $row.data('visible', true);
+        $row.find('.docs-navbar-tool').attr('href', data.url);
+        $('#attached-file-' + data.doc).html(data.title + ' <a class="btn btn-danger btn-xs attached-file" data-method="delete" data-remote="true" href="/documents/file/' + data.doc + '.json" rel="nofollow"><span class="glyphicon glyphicon-remove"></span></a>');
+      }
+    });
 });
+
+function initDocsTree(docdir, type, multiple) {
+  var docs_list = $('#modal-docs-list');
+  if(docs_list.length) {
+      docs_list.jstree({ core: {
+          multiple : multiple,
+          data: {
+              url : function (node) {
+                  return '/documents/tree/' + docdir + '/' + type + '.json';
+              },
+              data : function (node) {
+                  return { id: node.id };
+              }
+          }
+      },
+          plugins: multiple ? ['wholerow', 'checkbox'] : ['wholerow']
+      });
+
+      docs_list.on("loaded.jstree", function(event, data) {
+          $('#doc-select-jsPanel').jScrollPane({autoReinitialise: true});
+      });
+  }
+}

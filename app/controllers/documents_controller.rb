@@ -29,7 +29,11 @@ class DocumentsController < ApplicationController
   def shared
     @shared = true
     if params[:user_id].blank?
-      @users = User.where.not(id: current_user.id).page(params[:page])
+      @users = User.joins('LEFT OUTER JOIN documents ON documents.owner_id = users.id LEFT OUTER JOIN user_has_accesses ON documents.id = user_has_accesses.document_id').
+               where("user_has_accesses.user_id = #{current_user.id}").
+               where.not(id: current_user.id).
+               uniq.
+               page(params[:page])
     elsif params[:id].blank?
       @docs = Document.includes('user_has_accesses').where(parent_directory: nil, owner_id: params[:user_id], user_has_accesses: { user_id: current_user.id }).page(params[:page])
     else
@@ -38,25 +42,31 @@ class DocumentsController < ApplicationController
       @current_folder = Document.where(id: params[:id]).first
     end
 
+    @formats = FileInfo.uniq.pluck(:file_content_type)
+    @types = DocumentType.pluck(:title)
+
     unless @docs.nil?
       @folders = @docs.select { |doc| doc.doc_type == 0 }
       @files = @docs.select { |doc| doc.doc_type == 1 }
       render 'index'
     end
+    @types=DocumentType.pluck(:title)
+    @formats=FileInfo.uniq.pluck(:file_content_type)
   end
 
   def jstree
-    if params[:id] and params[:id] != '#'
-      @docs = Document.where(parent_directory: params[:id])
-    else
-      @docs = Document.where(parent_directory: nil)
-    end
+    @docs = Document.where(params[:docdir] == 'dir' ? { doc_type: 0 } : {}).
+                     where(parent_directory: (!params[:id].blank? && params[:id] != '#') ? params[:id] : nil)
   end
 
   def new
-    if params[:documents][:new_file].blank?
+    if params[:documents][:doctype] == 'folder'
       if create_document(0).save
         flash[:notice] = t('documents.folder_creation_success')
+      end
+    elsif params[:documents][:new_file].blank?
+      if create_document(1).save
+        flash[:notice] = t('documents.file_add_success')
       end
     else
       if save_file create_document 1
@@ -98,7 +108,11 @@ class DocumentsController < ApplicationController
         doc.description = params[:value]
       elsif params[:name] == 'title'
         doc.title = params[:value]
+      elsif !params[:target_pk].blank?
+        doc.parent_directory = params[:target_pk] == 'root' ? nil : params[:target_pk]
       end
+
+      doc.date_updated = Time.now
 
       if doc.save
         stat = msg = 'ok'
@@ -114,6 +128,8 @@ class DocumentsController < ApplicationController
           :msg => msg,
           :doc_id => doc.nil? ? -1 : doc.id
       }
+    else
+      redirect_to action: 'index', id: params[:folder_id]
     end
   end
 
@@ -160,6 +176,10 @@ class DocumentsController < ApplicationController
       end
     end
 
+    if stat != 'error'
+      @doc.update_attribute(:date_updated, Time.now)
+    end
+
     @access_type = params[:access_type]
     respond_to do |format|
       format.js   {}
@@ -176,5 +196,35 @@ class DocumentsController < ApplicationController
       flash[:notice] = t('documents.flash_removed_item')
     end
     redirect_to action: 'index'
+  end
+
+  def delete_file
+    stat = 'error'
+
+    if !params[:delete_id].blank?
+      doc = Document.find(params[:delete_id])
+      stat = 'ok' if doc.file_info.destroy
+    end
+
+    respond_to do |format|
+      format.json { render json: { status: stat, doc: doc ? doc.id : 0 } }
+    end
+  end
+
+  def change_file
+    stat = 'error'
+    if !params[:document][:doc_id].blank? and !params[:document][:new_file].blank?
+      doc = Document.find(params[:document][:doc_id])
+      if doc.file_info
+        doc.file_info.file = params[:document][:new_file]
+      else
+        doc.file_info = FileInfo.new(document_id: params[:document][:doc_id], file: params[:document][:new_file])
+      end
+      stat = 'ok' if doc.file_info.save
+    end
+
+    respond_to do |format|
+      format.json { render json: { status: stat, doc: doc ? doc.id : 0, title: doc.file_info.file_file_name, url: doc.file_info.file.url(:original, false) } }
+    end
   end
 end

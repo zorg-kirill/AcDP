@@ -52,6 +52,11 @@ uk:
     - :day
     - :month
     - :year
+    compact:
+      day: д
+      week: н
+      month: м
+      year: г
   datetime:
     distance_in_words:
       about_x_hours:
@@ -227,6 +232,7 @@ uk:
       default: '%a, %d %b %Y, %H:%M:%S %z'
       long: '%d %B %Y, %H:%M'
       short: '%d.%m.%Y %H:%M'
+      only_time: '%H:%M'
     pm: по полудні
   activemodel:
     errors:
@@ -267,6 +273,12 @@ uk:
         status: Статус
         check_list: Задачі
         executors: Виконавці
+      event:
+        name: Поле 'Назва'
+        date: Поле 'Дата проведення'
+        place: Поле 'Місце проведення'
+        plan: Поле 'План події'
+        guests: Поле 'Запрошені'
       doctype:
         title: Назва типу
       news_post:
@@ -276,13 +288,6 @@ uk:
         creator_id: Автор
         for_roles: Категорія
         icon: Іконка
-      task:
-        name: Назва
-        description: Опис
-        end_date: Кінцева дата
-        status: Статус
-        check_list: Задачі
-        executors: Виконавці
     errors:
       template:
         header:
@@ -344,6 +349,11 @@ uk:
     not_I: 'Всі, крім мене'
     add: Додати
     all_of: 'Всі, '
+    confirm: Підтвердити
+    optional: Не обов’язково
+    task_expiration_time: Дедлайн через
+    event_expiration_time: До початку події
+    to_activity: До активності
   users:
     users_panel: 'Пошук по користувачам'
     user_panel_desc: 'Пошук у списку користувачів за вказаними критеріями'
@@ -429,17 +439,19 @@ uk:
     open: Відкрити
     download: Скачати
     select_doc: Виберіть документ
+    select_folder: Виберіть папку
     docs_list: Список документів
     yyyymmdd: рррр-мм-дд
     not_earlier: Не раніше 
     not_later: Не пізніше
+    folders_list: Список папок
     information: Інформація
 
-    add_file: Додати файл
-    adding_file: Додання файлу
+    add_doc: Додати документ
+    adding_doc: Додання документу
     enter_file_title: Введіть назву для документу. За замовчанням буде використана назва файлу.
     title: Назва
-    file_add_success: Файл додано
+    file_add_success: Документ додано
 
     add_folder: Додати папку
     adding_folder: Додання папки
@@ -534,6 +546,7 @@ uk:
     name: Назва
     description: Опис
     end_date: Кінцева дата
+    end_time: Кінцевий час
     no_end_date_given: Без терміну
     status: Статус
     check_list: Задачі
@@ -543,6 +556,7 @@ uk:
     author_chosen_no_result: Не знайдено автора з таким ім’ям
     executor_chosen_no_result: Не знайдено виконавців з таким ім’ям
     no_tasks: У вас поки що немає жодного завдання
+    no_tasks_calendar: У вас немає жодного завдання на цей день
     progress: Прогрес
     creation_date: Дата створення
     statuses:
@@ -552,6 +566,8 @@ uk:
       Done: Виконано
     errors:
       not_engaged: "Ви не можете бачити деталі цього завдання, бо не є його учасником"
+      no_edit: Ви не можете редагувати дане завдання
+      not_found: За даним URL не знайдено жодного завдання
   comments:
     new_comment: Новий коментар
     send_comment: Коментувати
@@ -561,15 +577,20 @@ uk:
     name: Назва
     description: Опис
     date: Дата проведення
+    time: Час проведення
     place: Місце проведення
     plan: План події
     info: Картка події
     guests: Запрошені
     no_events: Найближчим часом немає жодних подій
+    no_events_calendar: У цей день у вас немає жодних подій
     no_search_result: За вашим запитом не знайдено жодної події
     cannot_visit: Не зможу прийти
     can_visit: Зможу прийти
     not_visiting: Не зможуть прийти
+    errors:
+      no_edit: Ви не можете редагувати дану подію
+      not_found: За даним URL не знайдено жодної події
   opinio:
     no_comments_found: Ще немає жодного коментаря
   activity:
@@ -578,12 +599,14 @@ uk:
   opinio:
     no_comments_found: Ще немає жодного коментаря
   activity:
+    the_hottest: Термінові
     all: Всі новини
     tasks: Завдання
     events: Події
     documents: Документи
     feed: Все
     no_activity_found: Не знайдено жодних новин
+    no_reminders: Найближчим часом нічого не заплановано
     trackable:
       event: подію
       task: завдання
@@ -608,3 +631,14 @@ uk:
     add_panel: Додавання типів документів
     placeholder: Тип
     removing: Видалення типу
+  day: день
+  days: дні
+  week: тиждень
+  weeks: тижні
+  year: рік
+  hour: година
+  hours: години
+  minute: хвилина
+  minutes: хвилини
+  second: секунда
+  seconds: секунди

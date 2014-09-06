@@ -121,7 +121,10 @@ div.select-document-panel {
     display: inline-block;
     float: right;
 }
-
 .dates table {
     width: 75%;
 }
+.btn-upload {
+  margin-top: 6px;
+}
+

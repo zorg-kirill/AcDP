@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title"><%= t('documents.adding_file') %></h4>
+        <h4 class="modal-title"><%= t('documents.adding_doc') %></h4>
       </div>
       <%= form_for(:documents, :html => { :class => 'form-vertical', role: 'form' }) do |f| %>
           <div class="modal-body">
@@ -12,7 +12,8 @@
               <%= f.text_field :new_doc_title, :placeholder => t('documents.title') + '...', :class => 'form-control' %>
             </div>
             <div id="role" class="form-group">
-              <%= label_tag :new_file, t('documents.file'), :class=>'col-sm-0 control-label' %>
+              <%= f.hidden_field :doctype, value: 'test' %>
+              <%= label_tag :new_file, "#{t('documents.file')} (#{t('util.optional')})", :class=>'col-sm-0 control-label' %>
               <%= f.file_field :new_file %>
             </div>
           </div>
